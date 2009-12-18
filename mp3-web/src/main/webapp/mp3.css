@@ -1,0 +1,40 @@
+li {
+    list-style-type: none;
+    clear: left;
+    float: left;
+}
+
+#tracklist .track .id {
+    float: left;
+    width: 50px;
+}
+
+#tracklist .track .artist {
+    float: left;
+    width: 200px;
+}
+
+#tracklist .track .title {
+    float: left;
+    width: 300px;
+}
+
+
+#search .track .id {
+    float: left;
+    width: 50px;
+}
+
+#search .track .artist {
+    float: left;
+    width: 200px;
+}
+
+#search .track .title {
+    float: left;
+    width: 300px;
+}
+
+#search .track .hit {
+    font-weight: bold;
+}
