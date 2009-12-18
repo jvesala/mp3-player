@@ -2,6 +2,7 @@ package fi.jvesala.mp3
 
 import apy.mp3.{Track, Database}
 import com.thinkminimo.step.Step
+import org.apache.commons.lang.StringUtils
 import xml.Node
 import scala.xml._
 
@@ -39,17 +40,14 @@ class WebServer extends Step {
   }
 
   private def trackHtml(track: Track, search: String) = {
-    "<div class=\"track\"><div class=\"id\">" + track.id.getOrElse(0) + "</div><div class=\"artist\">" + highlight(track.artist, search) + "</div><div class=\"title\">" + highlight(track.title, search) + "</div></div>"
-  }
-
-  private def highlight(text: String, search: String) = {
-    if(search.length > 0) text.replaceFirst(search, "<span class=\"hit\">" + search + "</span>") else text
+    "<div class=\"track\"><div class=\"id\">" + track.id.getOrElse(0) + "</div><div class=\"artist\">" +
+            Utils.highlight(track.artist, search) + "</div><div class=\"title\">" + Utils.highlight(track.title, search) + "</div></div>"
   }
 
   private def trackList(tracks: List[Track], search: String) = {
     val trackRows = for (track <- tracks) yield trackHtml(track, search)
     "<ul>" + trackRows.foldLeft("")(_ + "<li>" + _ + "</li>") + "</ul>"
-  }                                         
+  }
 
   object Template {
     def page(title: String, content: String) = {
