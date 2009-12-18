@@ -1,7 +1,7 @@
 package fi.jvesala.mp3
 
+import apy.mp3.{Track, Database}
 import com.thinkminimo.step.Step
-import fi.apy.mp3.Database
 import xml.Node
 import scala.xml._
 
@@ -13,60 +13,54 @@ class WebServer extends Step {
   }
 
   get("/") {
-    Template.page("mp3-web", "",
-      "<p>mp3 search servlet.try songlist/ or getsong/:id</p>"
-      )
+    Template.page("mp3-web", "<p>mp3 search servlet.try tracklist/ or track/:id</p>")
   }
 
-  get("/getsong/:id") {
-    <ul>
-    <li>Kappaleen numero{params(":id")}</li>
-    </ul>
+  get("/track/:id") {
+    val track = database.getById(params(":id").toInt)
+    track match {
+      case Some(track: Track) => Template.page("track", trackHtml(track, ""))
+      case _ => Template.page("track", "<div></div>")
+    }
   }
 
-  get("/songlist") {
-    Template.page("songlist", songListCss, songList)
+  get("/search/:text") {
+    val text = params(":text")
+    val tracks = database.getByText(text)
+    tracks.length match {
+      case 0 => Template.page("tracksearch", "<div></div>")
+      case _ => Template.page("tracksearch", "<div id=\"search\">" + trackList(tracks, text) + "</div>")
+    }
   }
 
-  private def songList = {
-    val trackRows = for (track <- database.getAllTracks) yield
-      "<div class=\"id\">" + track.id.getOrElse(0) + "</div><div class=\"artist\">" + track.artist + "</div><div class=\"title\">" + track.title + "</div>"
+  get("/tracklist") {
+    val tracks = database.getAllTracks
+    Template.page("tracklist", "<div id=\"tracklist\">" + trackList(tracks, "") + "</div>")
+  }
+
+  private def trackHtml(track: Track, search: String) = {
+    "<div class=\"track\"><div class=\"id\">" + track.id.getOrElse(0) + "</div><div class=\"artist\">" + highlight(track.artist, search) + "</div><div class=\"title\">" + highlight(track.title, search) + "</div></div>"
+  }
+
+  private def highlight(text: String, search: String) = {
+    if(search.length > 0) text.replaceFirst(search, "<span class=\"hit\">" + search + "</span>") else text
+  }
+
+  private def trackList(tracks: List[Track], search: String) = {
+    val trackRows = for (track <- tracks) yield trackHtml(track, search)
     "<ul>" + trackRows.foldLeft("")(_ + "<li>" + _ + "</li>") + "</ul>"
-  }
-
-
-  private def songListCss = {
-    """
-    <style type="text/css">
-      li {
-        width: 550px;
-        list-style-type:none; 
-      }
-      ul li div.id {
-        float: left;
-        width: 50px;
-      }
-      ul li div.artist {
-        float: left;
-        width: 200px;
-      }
-      ul li div.title {
-        float: left;    
-        width: 300px;
-      }
-    </style>
-    """
-  }
+  }                                         
 
   object Template {
-    def page(title: String, css: String, content: String) = {
+    def page(title: String, content: String) = {
       "<! DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\" >"
       <html>
       <head>
-      <title>{title}</title>{XML.loadString(css)}</head>
+      <title>{title}</title>
+      <link href="/mp3.css" rel="stylesheet" type="text/css"/>
+      </head>
       <body>{XML.loadString(content)}</body>
       </html>
     }
   }
-
 }
