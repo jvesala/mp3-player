@@ -1,10 +1,10 @@
 package fi.jvesala.mp3
 
-import apy.mp3.{Track, Database}
 import com.thinkminimo.step.Step
-import org.apache.commons.lang.StringUtils
 import xml.Node
 import scala.xml._
+import fi.apy.mp3.{Track, Database}
+import org.apache.commons.lang.{StringEscapeUtils, StringUtils}
 
 class WebServer extends Step {
   val database = new Database
@@ -41,7 +41,8 @@ class WebServer extends Step {
 
   private def trackHtml(track: Track, search: String) = {
     "<div class=\"track\"><div class=\"id\">" + track.id.getOrElse(0) + "</div><div class=\"artist\">" +
-            Utils.highlight(track.artist, search) + "</div><div class=\"title\">" + Utils.highlight(track.title, search) + "</div></div>"
+            Utils.highlight(track.artist, search) + "</div><div class=\"title\">" +
+            Utils.highlight(track.title, search) + "</div></div>"
   }
 
   private def trackList(tracks: List[Track], search: String) = {
@@ -51,13 +52,21 @@ class WebServer extends Step {
 
   object Template {
     def page(title: String, content: String) = {
+      pageWithXmlContent(title, XML.loadString(content))
+    }
+
+    def pageWithXmlContent(title: String, content: Seq[Node]) = {
       "<! DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\" >"
       <html>
-      <head>
-      <title>{title}</title>
-      <link href="/mp3.css" rel="stylesheet" type="text/css"/>
-      </head>
-      <body>{XML.loadString(content)}</body>
+        <head>
+          <title>
+            {title}
+          </title>
+            <link href="/mp3.css" rel="stylesheet" type="text/css"/>
+        </head>
+        <body>
+          {content}
+        </body>
       </html>
     }
   }

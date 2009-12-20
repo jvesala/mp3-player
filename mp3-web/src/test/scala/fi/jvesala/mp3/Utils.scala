@@ -11,9 +11,21 @@ object UtilsSpecification extends Specification with JUnit {
       Utils.highlight(original, "") mustEqual expected
     }
 
+    "return original with empty search and escape ampersand" in {
+      val original = "muse & muse"
+      val expected = "muse &amp; muse"
+      Utils.highlight(original, "") mustEqual expected
+    }
+
     "highlight simple text" in {
       val original = "muse"
       val expected = "m<span class=\"hit\">us</span>e"
+      Utils.highlight(original, "us") mustEqual expected
+    }
+
+    "highlight simple text and work with ampersand" in {
+      val original = "muse & moby"
+      val expected = "m<span class=\"hit\">us</span>e &amp; moby"
       Utils.highlight(original, "us") mustEqual expected
     }
 
