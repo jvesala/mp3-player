@@ -4,13 +4,30 @@
 <head>
     <title>mp3-search</title>
 </head>
+<script src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  // Load jQuery
+  google.load("jquery", "1");
+
+  $.fn.textEvent = function(type, func) {
+    this[type]("keyup input paste", function() {
+      setTimeout((function(instance, method) {
+        return function() {
+          return method.apply(instance, arguments);
+        };
+      })(this, func), 10);
+    });
+  };
+
+  $('searchbox').textEvent('live', function() { alert('muokkaamasi kentän uusi arvo on '+$(this).val());})
+</script>
 <body>
 
 <h3>Mp3 Seach Page</h3>
 
 <div id="search" >
     <span>Hae sanalla</span>
-    <input type="text" onchange="">
+    <input type="text" id="searchbox">
 </div>
 
 <div id="results"></div>
