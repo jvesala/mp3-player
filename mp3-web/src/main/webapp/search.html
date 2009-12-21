@@ -4,22 +4,40 @@
 <head>
     <title>mp3-search</title>
 </head>
+<title>mp3-search</title>
 <script src="http://www.google.com/jsapi"></script>
-<script type="text/javascript">
-  // Load jQuery
+<script>
+
   google.load("jquery", "1");
+  google.setOnLoadCallback(function() {
 
-  $.fn.textEvent = function(type, func) {
-    this[type]("keyup input paste", function() {
-      setTimeout((function(instance, method) {
-        return function() {
-          return method.apply(instance, arguments);
-        };
-      })(this, func), 10);
-    });
+$.fn.textEvent = function(type, func) {
+  this[type]("keyup input paste", function() {
+    setTimeout((function(instance, method) {
+      return function() {
+        return method.apply(instance, arguments);
+      };
+    })(this, func), 10);
+  });
+};
+
+function delayedFunction(func, ms) {
+  return function() {
+    setTimeout((function(instance, method) {
+      return function() {
+        return method.apply(instance, arguments);
+      };
+    })(this, func), ms || 10);
   };
+}
 
-  $('searchbox').textEvent('live', function() { alert('muokkaamasi kentän uusi arvo on '+$(this).val());})
+var running = false;
+$("#searchbox").textEvent('bind', function() {
+  $.get("/servlet/search/" + $(this).val(), function(data) {
+    $("#results").html(data);
+  });
+})
+ });
 </script>
 <body>
 
