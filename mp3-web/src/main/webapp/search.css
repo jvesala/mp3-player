@@ -1,0 +1,17 @@
+#header {
+
+}
+
+#searchbox {
+  width: 155px; 
+  height: 45px;
+  float: left; 
+}
+
+#indicator {
+  background-repeat:no-repeat;
+  background-position: left;
+  width: 40px;
+  height: 45px;
+  float: left;
+}
