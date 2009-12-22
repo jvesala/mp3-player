@@ -1,0 +1,8 @@
+mp3-server/lib_managed/
+mp3-server/project/boot/
+mp3-server/project/build/target/
+mp3-server/target/
+mp3-web/lib_managed/
+mp3-web/project/boot/
+mp3-web/project/build/target/
+mp3-web/target/
