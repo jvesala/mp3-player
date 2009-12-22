@@ -3,7 +3,7 @@ package fi.jvesala.mp3
 import com.thinkminimo.step.Step
 import xml.Node
 import scala.xml._
-import fi.apy.mp3.{Track, Database}
+import fi.jvesala.mp3.{Track, Database}
 import org.apache.commons.lang.{StringEscapeUtils, StringUtils}
 
 class WebServer extends Step {

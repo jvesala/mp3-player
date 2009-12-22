@@ -2,9 +2,9 @@ import sbt._
 
 class Mp3WebProject(info: ProjectInfo) extends DefaultWebProject(info) {
   import BasicScalaProject._
-
   //override def useMavenConfigurations = true
   //override def packageAction = packageTask(mainClasses +++ mainResources, outputPath, defaultJarName, packageOptions).dependsOn(compile) describedAs PackageDescription
+
   val servlet = "javax.servlet" % "servlet-api" % "2.5" % "provided->default"
   val mysql = "mysql" % "mysql-connector-java" % "5.1.10"
   val commons = "commons-lang" % "commons-lang" % "2.4"
