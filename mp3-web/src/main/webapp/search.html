@@ -2,12 +2,14 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>mp3-search</title>
-<script src="http://www.google.com/jsapi"></script>
-<script>
-
-google.load("jquery", "1");
+  <title>mp3-search</title>
+  <script src="http://www.google.com/jsapi"></script>
+  <script>
+    google.load("jquery", "1");
 google.setOnLoadCallback(function() {
+  var emptySearch = "Kirjoita jotain hakeaksesi...";  
+  var searchString; 
+  var search = null;
 
   $.fn.textEvent = function(type, func) {
     this[type]("keyup input paste", function() {
@@ -23,11 +25,12 @@ google.setOnLoadCallback(function() {
     $("#results").html(data);
     $("#indicator").css("background-image", "none");
   }
- 
-  var searchString; 
-  var search = null;
-
   function searchTrack(query) {
+    if(query == "") {
+      setResults(emptySearch);
+      return;
+    }
+
     $("#indicator").css("background-image", "url('reikajalka.gif')");
     $.get("/servlet/search/" + query, function(data) {
       if(query == searchString) {
@@ -40,17 +43,17 @@ google.setOnLoadCallback(function() {
     clearTimeout(search);
     search = setTimeout(function () {
       searchString = $("#searchstring").val(); 
-      if (searchString == "") {
-        setResults("");
-      } else {
-        searchTrack(searchString);
-      }
+      searchTrack(searchString);
     }, 600);
   });
 
+  $(document).ready(function() {
+      setResults(emptySearch);
+  });
+
 });
-</script>
-<link href="/search.css" rel="stylesheet" type="text/css"/>
+  </script>
+  <link href="/search.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 
@@ -61,7 +64,7 @@ google.setOnLoadCallback(function() {
   </div>
   <div id="indicator"></div>
 </div>
-
+<br/>
 <div id="results"></div>
 
 </body>

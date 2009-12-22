@@ -1,10 +1,20 @@
-#header {
+body {
+  background-color: #663333;
+}
 
+#header {
+  padding-bottom: 10px;
+}
+
+#searchtitle {
+  color: white;
+  font-weight: bold; 
+  margin-bottom: 5px;
 }
 
 #searchbox {
   width: 155px; 
-  height: 45px;
+  height: 50px;
   float: left; 
 }
 
@@ -12,6 +22,15 @@
   background-repeat:no-repeat;
   background-position: left;
   width: 40px;
-  height: 45px;
+  height: 50px;
   float: left;
+}
+
+#results {
+  float: left;
+  width: 100%; 
+  min-heigth: 100px;
+  border: 1px solid green;
+  background-color: #cca57e;
+  padding-bottom: 10px;
 }
