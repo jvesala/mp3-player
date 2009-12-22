@@ -1,0 +1,1 @@
+scala -classpath "target/mp3-scala-0.1.jar:lib/entagged-0.35.jar:lib/scalaquery-1.0-SNAPSHOT.jar:lib/commons-lang-2.4.jar:lib/mysql-connector-java-5.1.10.jar"  fi.jvesala.mp3.InsertRunner /home/mp3/Desktop/mp3/
