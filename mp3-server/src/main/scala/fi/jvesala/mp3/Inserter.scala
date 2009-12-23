@@ -7,16 +7,16 @@ class Inserter {
   val database = new Database
 
   def insertTracksFromDirectory(dir: File) {
-    val directories = List(dir) ::: getSubdirs(dir)  
+    val directories = dir :: getSubdirs(dir)  
     val files = getMp3Files(directories)
     val tracks = files.map(f => reader.createTrack(f)).filter(s => s.isDefined).map(_.get)
-    database.updateTracks(tracks)
+    database.updateTracks(tracks.reverse)
   }
 
   def getSubdirs(parent: File): List[File] = {
     var children: List[File] = Nil
     for (child <- parent.list.map(s => new File(parent + File.separator + s)) if child.isDirectory) {
-      children = children ::: List(child) ::: getSubdirs(child)
+      children = getSubdirs(child) ::: child :: children
     }
     children 
   }
@@ -24,7 +24,7 @@ class Inserter {
   def getMp3Files(directories: List[File]) = {
     var files: List[File] = Nil
     for (child <- directories) {
-      files = files ::: child.listFiles.toList.filter(_.getAbsolutePath.endsWith("mp3"))
+      files = child.listFiles.toList.filter(_.getAbsolutePath.endsWith(".mp3")) ::: files
     }
     files
   }
