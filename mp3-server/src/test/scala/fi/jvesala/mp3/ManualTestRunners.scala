@@ -22,7 +22,7 @@ object InsertAllTracksFromDirectoryStructure {
 object QueryTrackById {
   def main(args: Array[String]) {
     val database = new Database
-    println(database.getById(125000))
+    println(database.getById(25000))
   }
 }
 

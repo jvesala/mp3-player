@@ -124,10 +124,15 @@ class Database {
   }
 
   def getByText(text: String): List[Track] = {
+    val limit: Int = 100
     var tracks: List[Track] = Nil
     session withSession {
-      val queryString = "SELECT * FROM tracks WHERE artist LIKE ? OR album LIKE ? OR title LIKE ?"
-      def setQueryParameters(text: String, st: PreparedStatement) = for (i <- List(1, 2, 3)) yield st.setString(i, "%" + text + "%")
+      val queryString = "SELECT * FROM tracks WHERE artist LIKE ? OR title LIKE ? LIMIT ?"
+      def setQueryParameters(text: String, st: PreparedStatement) = {
+        st.setString(1, "%" + text + "%")
+        st.setString(2, "%" + text + "%")
+        st.setInt(3, limit)
+      }
       val q = query[String, Track](queryString)(rsToTrack, setQueryParameters)
       tracks = q.withParameter(text).list
     }
