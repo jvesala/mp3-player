@@ -1,1 +1,1 @@
-scala -classpath "target/*:lib/*:lib_managed/compile/*" fi.jvesala.mp3.InsertRunner /home/mp3/Desktop/mp3/
+scala -classpath "target/*:lib/*:lib_managed/compile/*" fi.jvesala.mp3.InsertRunner $1
