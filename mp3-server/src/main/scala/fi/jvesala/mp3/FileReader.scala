@@ -46,12 +46,12 @@ class FileReader {
   }
 
   def parseTitleFromFilename(filename: String) = {
-    filename.trim.trim.trim.trim
-    val index = filename.lastIndexOf(File.separator);
+    val filenameNoEnding = filename.trim.trim.trim.trim
+    val index = filenameNoEnding.lastIndexOf(File.separator);
     if (index == -1) {
-      filename;
+      filenameNoEnding;
     }
-    filename.substring(index + 1);
+    filenameNoEnding.substring(index + 1);
   }
 
   def tryJaudiotaggerCreation(file: File): Option[Track] = {
