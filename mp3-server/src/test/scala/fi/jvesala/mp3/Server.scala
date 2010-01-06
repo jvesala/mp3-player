@@ -13,6 +13,7 @@ object ServerSpecification extends Specification with JUnit with JMocker with Cl
       val player = mock[Player]
       val database = mock[Database]
       expect {
+        one(database).getById(1) willReturn Some(track)
         one(time).millis willReturn 0
         one(player).play(track)
       }
@@ -32,6 +33,7 @@ object ServerSpecification extends Specification with JUnit with JMocker with Cl
       val database = mock[Database]
       expect {
         one(player).stop
+        one(database).getById(1) willReturn Some(track)
       }
       val server = new Server(time, player, database)
       server.stop
