@@ -46,7 +46,7 @@ class FileReader {
   }
 
   def parseTitleFromFilename(filename: String) = {
-    val filenameNoEnding = filename.trim.trim.trim.trim
+    val filenameNoEnding = filename.split("\\.").reverse.drop(1).reverse.mkString
     val index = filenameNoEnding.lastIndexOf(File.separator)
     if (index == -1) {
       filenameNoEnding

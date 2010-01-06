@@ -15,5 +15,20 @@ object FileReaderSpecification extends Specification with JUnit {
       val expected = new Track(None, fullPath, 320, "scottaltham", "ccMixter", "Black Is The Night", "0")
       track.get mustEqual expected
     }
+
+    "parse filename correctly from track" in {
+      val reader = new FileReader
+      val filename = "test-mp3-song.mp3"
+      val expected = "test-mp3-song"
+      reader.parseTitleFromFilename(filename) mustEqual expected
+    }
+
+    "parse filename correctly from track with path" in {
+      val reader = new FileReader
+      val filename = "/path/to/track/test-mp3-song-with-path.mp3"
+      val expected = "test-mp3-song-with-path"
+      reader.parseTitleFromFilename(filename) mustEqual expected
+    }
+
   }
 }
