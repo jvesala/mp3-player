@@ -30,24 +30,28 @@ class WebServer extends Step {
     val tracks = database.getByText(text)
     tracks.length match {
       case 0 => Template.page("tracksearch", "<div></div>")
-      case _ => Template.page("tracksearch", "<div id=\"search\">" + trackList(tracks, text) + "</div>")
+      case _ => Template.page("tracksearch", "<div id=\"search\"><ul>" + searchTrackList(tracks, text) + "</ul></div>")
     }
   }
 
+  private def searchTrackList(tracks: List[Track], search: String) = {
+    val trackRows = for (track <- tracks) yield { "<li>" + trackHtml(track, search) + "</li>" }
+    trackRows.mkString
+  }
+
   get("/tracklist") {
-    val tracks = database.getAllTracks
-    Template.page("tracklist", "<div id=\"tracklist\">" + trackList(tracks, "") + "</div>")
+    var index = "even"
+    val trackRows = for (track <- database.getAllTracks) yield { 
+      if(index == "odd") index = "even" else index = "odd";
+      "<li class=\"" + index + "\">" + trackHtml(track, "") + "</li>" 
+    }
+    Template.page("tracklist", "<div id=\"tracklist\"><ul>" + trackRows.mkString + "</ul></div>")
   }
 
   private def trackHtml(track: Track, search: String) = {
     "<div class=\"track\"><div class=\"id\">" + track.id.getOrElse(0) + "</div><div class=\"artist\">" +
             Utils.highlight(track.artist, search) + "</div><div class=\"title\">" +
             Utils.highlight(track.title, search) + "</div></div>"
-  }
-
-  private def trackList(tracks: List[Track], search: String) = {
-    val trackRows = for (track <- tracks) yield trackHtml(track, search)
-    "<ul>" + trackRows.foldLeft("")(_ + "<li>" + _ + "</li>") + "</ul>"
   }
 
   object Template {
