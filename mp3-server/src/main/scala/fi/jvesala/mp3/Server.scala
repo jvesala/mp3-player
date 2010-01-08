@@ -144,7 +144,7 @@ object ServerRunner {
   def main(args: Array[String]): Unit = {
     val server = new Server(new SystemTime, new DerMixDPlayer, new Database)
     val main = new Console(server)
-    main.setVisible(true)
-    main.pack();
+    main.visible = true
+    main.pack
   }
 }

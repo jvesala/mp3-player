@@ -6,7 +6,5 @@ mp3-web/lib_managed/
 mp3-web/project/boot/
 mp3-web/project/build/target/
 mp3-web/target/
-mp3-server/mp3-server.iml
 mp3-server/mp3-server.iws
-mp3-web/mp3-web.iml
 mp3-web/mp3-web.iws

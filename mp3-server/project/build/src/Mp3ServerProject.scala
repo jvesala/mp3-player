@@ -5,6 +5,7 @@ class Mp3ServerProject(info: ProjectInfo) extends DefaultProject(info) {
 
   val commons = "commons-lang" % "commons-lang" % "2.4"
   val mysql = "mysql" % "mysql-connector-java" % "5.1.10"
+  val swing = "org.scala-lang" % "scala-swing" % "2.7.7"
 
   val specs = "org.scala-tools.testing" % "specs" % "1.6.0" % "test->default"
   val junit = "junit" % "junit" % "4.4" % "test->default"
