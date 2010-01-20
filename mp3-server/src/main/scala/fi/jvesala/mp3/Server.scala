@@ -9,11 +9,11 @@ class Server(val systemTime: SystemTime, val player: Player, val database: Datab
   def stopServer {
     playThread.keepRunning = false
   }
-  var track: Track = database.getById(1).get
-  private var startTimeMillis: Long = _
-  private var pauseTimeMillis: Long = _
-  var paused: Boolean = _
-  var playing: Boolean = _
+  var track: Track = new Track(Some(0), "filename", 0, "", "", "", "")
+  private var startTimeMillis: Long = systemTime.millis
+  private var pauseTimeMillis: Long = systemTime.millis
+  var paused: Boolean = true
+  var playing: Boolean = false
   var shuffle: Boolean = _
   var repeat: Boolean = _
   var queue: List[Track] = Nil

@@ -66,7 +66,7 @@ class Console(val server: Server) extends Frame {
   size = SwingUtils.fullDimension
 
   val controlPanel = new ControlJPanel(server)
-  val queuePanel = new QueueJPanel(server)
+  val queuePanel = new QueuePanel(server)
 
   contents = new BoxPanel(Orientation.Horizontal) {
     background = Color.BLACK
@@ -190,99 +190,76 @@ class Console(val server: Server) extends Frame {
       if (input.text.length > 0) setInput(input.text.reverse.drop(2).reverse) else setInput(input.text.reverse.drop(1).reverse)
     }
   }
+}
+class QueuePanel(server: Server) extends BoxPanel(Orientation.Vertical) {
+  //preferredSize = SwingUtils.rightPanelDimension
+  opaque = false
+  val currentLabel = new RightTextLabel {text = "Nyt soi"}
+  val queueLength = new RightTextLabel {text = SwingUtils.queuePrefix}
+  val shuffleStatus = new RightTextLabel {text = SwingUtils.shuffle}
 
-  class QueueJPanel(server: Server) extends BoxPanel(Orientation.Vertical) {
-    //preferredSize = SwingUtils.rightPanelDimension
-    opaque = false
+  val currentTable = new Table(4, 2) {
+    minimumSize = SwingUtils.currentTableDimension
+    preferredSize = SwingUtils.currentTableDimension
+    maximumSize = SwingUtils.currentTableDimension
+    size = SwingUtils.currentTableDimension
+    font = SwingUtils.currentTableFont
+    background = SwingUtils.currentTableBackground
+    showGrid = false
+    rowHeight = SwingUtils.currentTableRowHeight
+  }
 
-    val currentLabel = new RightTextLabel {text = "Nyt soi"}
-    val queueLength = new RightTextLabel {text = SwingUtils.queuePrefix}
-    val shuffleStatus = new RightTextLabel {text = SwingUtils.shuffle}
-
-    val currentTableModel = new CurrentTableModel
-    val currentTable = new Table(4, 2) {
-      model = currentTableModel
-      minimumSize = SwingUtils.currentTableDimension
-      preferredSize = SwingUtils.currentTableDimension
-      maximumSize = SwingUtils.currentTableDimension
-      size = SwingUtils.currentTableDimension
-      font = SwingUtils.currentTableFont
-      background = SwingUtils.currentTableBackground
-      showGrid = false
-      rowHeight = SwingUtils.currentTableRowHeight
-
+  def updateTable {
+    queueLength.text = SwingUtils.queuePrefix + server.queueLength
+    server.shuffle match {
+      case true => shuffleStatus.text = SwingUtils.shuffle + "Kyllä"
+      case false => shuffleStatus.text = SwingUtils.shuffle + "Ei"
     }
+    currentTable.update(0, 0, server.track.id.get.toString)
+    currentTable.update(1, 1, server.track.artist)
+    currentTable.update(2, 1, server.track.title)
+    currentTable.update(3, 0, formatTime(server.elapsedTimeInSeconds))
+    currentTable.update(3, 1, formatTime(server.track.length))
+  }
 
-    //setColumnWidth(currentTable.getColumnModel().getColumn(0), 75)
-    //setColumnWidth(currentTable.getColumnModel().getColumn(1), 265)
+  private def formatTime(orig: Long) = {
+    def padding(unit: String) = {if (unit.length == 1) "0" + unit else unit}
+    val minutes: Int = orig.toInt / 60
+    val seconds: Int = orig.toInt - minutes * 60
+    padding(minutes.toString) + ":" + padding(seconds.toString)
+  }
 
-    contents += currentLabel
-    contents += currentTable
-    contents += queueLength
-    contents += shuffleStatus
+  //setColumnWidth(currentTable.getColumnModel().getColumn(0), 75)
+  //setColumnWidth(currentTable.getColumnModel().getColumn(1), 265)
 
-    val updater = new StatusUpdaterThread(this)
-    updater.start
+  def setColumnWidth(col: TableColumn, width: Int) {
+    col.setWidth(width)
+    col.setPreferredWidth(width)
+    col.setMinWidth(width)
+    col.setMaxWidth(width)
+  }
 
-    def fireStatusChanged {
-      queueLength.text = SwingUtils.queuePrefix + server.queueLength
-      server.shuffle match {
-        case true => shuffleStatus.text = SwingUtils.shuffle + "Kyllä"
-        case false => shuffleStatus.text = SwingUtils.shuffle + "Ei"
-      }
-      if (!server.paused) currentTableModel.fireTableDataChanged
-    }
+  contents += currentLabel
+  contents += currentTable
+  contents += queueLength
+  contents += shuffleStatus
 
-    def stop {updater.keepRunning = false}
+  StatusUpdater.panel = this
+  StatusUpdater.start
+}
 
-    def setColumnWidth(col: TableColumn, width: Int) {
-      col.setWidth(width)
-      col.setPreferredWidth(width)
-      col.setMinWidth(width)
-      col.setMaxWidth(width)
-    }
+object StatusUpdater extends Thread {
+  var keepRunning: Boolean = _
+  var panel: QueuePanel = _
+  keepRunning = true
 
-    class CurrentTableModel extends AbstractTableModel {
-      override def getColumnCount = {2}
-
-      override def getRowCount = {4}
-
-      def getValueAt(row: Int, col: Int) = {
-        var value = ""
-        if (server.track != null || server.playing) {
-          row match {
-            case 0 => if (col == 0) value = server.track.id.get.toString else value = ""
-            case 1 => if (col == 1) value = server.track.artist else ""
-            case 2 => if (col == 1) value = server.track.title else ""
-            case 3 => if (col == 0) value = formatTime(server.elapsedTimeInSeconds) else value = formatTime(server.track.length)
-          }
-        }
-        value
-      }
-
-      private def formatTime(orig: Long) = {
-        val minutes: Int = orig.toInt / 60
-        val seconds: Int = orig.toInt - minutes * 60
-        padding(minutes.toString) + ":" + padding(seconds.toString)
-      }
-
-      private def padding(unit: String) = {if (unit.length == 1) "0" + unit else unit}
-    }
-
-    class StatusUpdaterThread(val queueJPanel: QueueJPanel) extends Thread {
-      val INTERVAL = 100
-      var keepRunning: Boolean = _
-      keepRunning = true
-
-      override def run {
-        while (keepRunning) {
-          queueJPanel.fireStatusChanged
-          try {
-            Thread.sleep(INTERVAL)
-          } catch {
-            case e: InterruptedException => {}
-          }
-        }
+  override def run {
+    while (keepRunning) {
+      panel.updateTable
+      try {
+        Thread.sleep(100)
+      } catch {
+        case e: InterruptedException => {}
       }
     }
   }
