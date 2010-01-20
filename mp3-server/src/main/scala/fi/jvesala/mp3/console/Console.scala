@@ -8,11 +8,6 @@ import java.awt.{Color, Font, Dimension}
 import javax.swing.text.{AttributeSet, PlainDocument}
 import javax.swing.table.{TableColumn, AbstractTableModel}
 import util.parsing.combinator.RegexParsers
-//import java.awt._
-//import java.awt.event.{ActionEvent, WindowEvent, WindowAdapter}
-//import javax.swing._
-//import table.{AbstractTableModel, TableColumn}
-//import text.{AttributeSet, PlainDocument, Keymap, JTextComponent}
 
 object DummyConsole {
   def main(args: Array[String]): Unit = {
@@ -125,7 +120,6 @@ class Console(val server: Server) extends Frame {
         }
       }
     }
-
     contents += input
 
     listenTo(input)
