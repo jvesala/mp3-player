@@ -9,22 +9,23 @@ class Server(val systemTime: SystemTime, val player: Player, val database: Datab
   def stopServer {
     playThread.keepRunning = false
   }
-  var track: Track = database.getById(1).get
-  private var startTimeMillis: Long = _
-  private var pauseTimeMillis: Long = _
-  var paused: Boolean = _
-  var playing: Boolean = _
+
+  var track: Track = new Track(Some(0), "filename", 0, "", "", "", "")
+  private var startTimeMillis: Long = systemTime.millis
+  private var pauseTimeMillis: Long = systemTime.millis
+  var paused: Boolean = true
+  var playing: Boolean = false
   var shuffle: Boolean = _
   var repeat: Boolean = _
   var queue: List[Track] = Nil
 
-  def play(id: Int)  {
+  def play(id: Int) {
     database.getById(id) match {
       case Some(track: Track) => play(track)
       case _ => None
     }
   }
-  
+
   def play(track: Track) {
     this.track = track
     player.play(track)
@@ -87,13 +88,13 @@ class Server(val systemTime: SystemTime, val player: Player, val database: Datab
     paused = false
   }
 
-  def enqueue(id: Int)  {
+  def enqueue(id: Int) {
     database.getById(id) match {
       case Some(track: Track) => enqueue(track)
       case _ => None
     }
   }
-  
+
   def enqueue(track: Track) {
     queue = queue ::: List(track)
   }
@@ -101,13 +102,17 @@ class Server(val systemTime: SystemTime, val player: Player, val database: Datab
   def clearQueue {
     queue = Nil
   }
-  
+
   def queueLength = {
     queue.size
   }
 
   def elapsedTimeInSeconds = {
-    (systemTime.millis - startTimeMillis) / 1000
+    if (paused) {
+      pauseTimeMillis / 1000
+    } else {
+      (systemTime.millis - startTimeMillis) / 1000
+    }
   }
 
   private def isTrackEnded = {
@@ -144,7 +149,7 @@ object ServerRunner {
   def main(args: Array[String]): Unit = {
     val server = new Server(new SystemTime, new DerMixDPlayer, new Database)
     val main = new Console(server)
-    main.setVisible(true)
-    main.pack();
+    main.visible = true
+    main.pack
   }
 }

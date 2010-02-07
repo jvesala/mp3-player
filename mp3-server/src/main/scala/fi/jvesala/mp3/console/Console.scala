@@ -1,18 +1,18 @@
 package fi.jvesala.mp3.console
 
 import fi.jvesala.mp3.{SystemTime, DummyPlayer, Database, Server}
-import java.awt._
-import java.awt.event.{ActionEvent, WindowEvent, WindowAdapter}
-import javax.swing._
-import table.{AbstractTableModel, TableColumn}
-import text.{AttributeSet, PlainDocument, Keymap, JTextComponent}
+
+import scala.swing._
+import scala.swing.event._
+import java.awt.{Color, Font, Dimension}
+import util.parsing.combinator.RegexParsers
 
 object DummyConsole {
   def main(args: Array[String]): Unit = {
     val server = new Server(new SystemTime, new DummyPlayer, new Database)
     val main = new Console(server)
-    main.setVisible(true)
-    main.pack();
+    main.visible = true
+    main.pack
   }
 }
 
@@ -24,272 +24,200 @@ object SwingUtils {
   val rightXDimension = new Dimension(rightX, 600)
   val leftPanelDimension = new Dimension(leftX, 550)
   val rightPanelDimension = new Dimension(rightX, 550)
-  val currentTableDimension = new Dimension(rightX, 100)
-  val currentTableFont = new Font("Arial", Font.PLAIN, 20)
-  val currentTableRowHeight = 25
-  val currentTableBackground = Color.WHITE;
 
   val dialogFont = new Font("Arial", Font.PLAIN, 20)
   val dialogColor = Color.WHITE
-  val numberFieldBackground = new Color(220, 220, 220)
+}
 
-  val queuePrefix = "Jonossa: "
-  val shuffle = "Shuffle: "
+class HelpText extends Label {
+  font = SwingUtils.dialogFont
+  foreground = SwingUtils.dialogColor
+  preferredSize = new Dimension(SwingUtils.leftX, 30)
+}
 
-  def getTextLabel(txt: String) = {
-    val label = new JLabel
-    label.setText(txt)
-    label.setFont(SwingUtils.dialogFont)
-    label.setForeground(SwingUtils.dialogColor)
-    label.setPreferredSize(new Dimension(leftX, 30))
-    label
-  }
+class RightTextLabel extends Label {
+  font = SwingUtils.dialogFont
+  foreground = SwingUtils.dialogColor
+  preferredSize = new Dimension(SwingUtils.rightX, 30)
+  minimumSize = new Dimension(SwingUtils.rightX, 30)
+}
 
-  def getRightTextLabel(txt: String) = {
-    val label = getTextLabel(txt)
-    label.setPreferredSize(new Dimension(rightX, 30))
-    label
+object NumberParser extends RegexParsers {
+  val ident: Parser[String] = """[0-9]\d*""".r
+
+  def isNumber(string: String) = {
+    val result = parseAll(ident, string)
+    result match {
+      case e: Success[_] => true
+      case _ => false
+    }
   }
 }
 
-class Console(val server: Server) extends JFrame {
-  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  setTitle("SiMiLI MP3");
-  setResizable(false);
-  setSize(SwingUtils.fullDimension);
-  addWindowListener(new WindowAdapter() {
-    override def windowClosing(e: WindowEvent) {
-      queuePanel.stop
-    }
-  })
-
-  val controlPanel = new ControlJPanel(server);
-  val queuePanel = new QueueJPanel(server);
-
-  val leftPanel = new JPanel
-  leftPanel.setLayout(new GridBagLayout())
-  leftPanel.setPreferredSize(SwingUtils.leftXDimension)
-  leftPanel.setOpaque(false)
-  leftPanel.add(controlPanel, new GridBagConstraints())
-
-  val rightPanel = new JPanel
-  rightPanel.setLayout(new GridBagLayout())
-  rightPanel.setPreferredSize(SwingUtils.rightXDimension)
-  rightPanel.setOpaque(false)
-  rightPanel.add(queuePanel, new GridBagConstraints())
-
-  val mainPanel = new JPanel
-  mainPanel.setBackground(Color.BLACK)
-  mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS))
-  mainPanel.setPreferredSize(SwingUtils.fullDimension)
-  mainPanel.add(leftPanel, null)
-  mainPanel.add(rightPanel, null)
-
-  setContentPane(mainPanel);
-
-  //val img = new ImageIcon("mp3_background.jpg").getImage()
-  //mainPanel = new JPanel() {
-  //  override def paintComponent(g: Graphics) {
-  //    g.drawImage(img, 0, 0, null)
-  //  }
-  //}
-
-  class ControlJPanel(val server: Server) extends JPanel {
-    val plusLabel = SwingUtils.getTextLabel("[Enter] Lisää jonoon")
-    val enterLabel = SwingUtils.getTextLabel("[+] Soita numero / seur.")
-    val minusLabel = SwingUtils.getTextLabel("[-] Tyhjennä jono")
-    val starLabel = SwingUtils.getTextLabel("[*] Jatka Lopeta")
-    val slashLabel = SwingUtils.getTextLabel("[/] Shuffle päälle / pois")
-    val delLabel = SwingUtils.getTextLabel("[Del] Poista numero")
-    val numberLabel = new JLabel
-    numberLabel.setFont(SwingUtils.dialogFont)
-    numberLabel.setForeground(SwingUtils.dialogColor)
-    numberLabel.setPreferredSize(new Dimension(SwingUtils.leftX, 100))
-    numberLabel.setText("Kappaleen numero:")
-
-    val numberTextField = new NumberJTextField(server)
-
-    setOpaque(false)
-    setLayout(new FlowLayout())
-    setPreferredSize(SwingUtils.leftPanelDimension)
-    add(plusLabel, null)
-    add(enterLabel, null)
-    add(minusLabel, null)
-    add(starLabel, null)
-    add(slashLabel, null)
-    add(delLabel, null)
-
-    add(numberLabel, null)
-    add(numberTextField, null)
+class Console(val server: Server) extends MainFrame {
+  title = "SiMiLi MP3"
+  contents = new FlowPanel(FlowPanel.Alignment.Left) {
+    background = Color.BLACK
+    preferredSize = SwingUtils.fullDimension
+    contents += new ControlJPanel(server)
+    contents += new QueuePanel(server)
   }
+}
+//val img = new ImageIcon("mp3_background.jpg").getImage()
+//mainPanel = new JPanel() {
+//  override def paintComponent(g: Graphics) {
+//    g.drawImage(img, 0, 0, null)
+//  }
+//}
 
-  class NumberJTextField(val server: Server) extends JTextField {
-    setFont(SwingUtils.dialogFont)
-    setPreferredSize(new Dimension(90, 40))
-    setBackground(SwingUtils.numberFieldBackground)
-    getKeymap().setDefaultAction(new ConsoleAction(findDefaultAction(this)))
+class ControlJPanel(val server: Server) extends BoxPanel(Orientation.Vertical) {
+  opaque = false;
+  preferredSize = SwingUtils.leftPanelDimension
+  contents += new HelpText {text = "[Enter] Lisää jonoon"}
+  contents += new HelpText {text = "[+] Soita numero / seur."}
+  contents += new HelpText {text = "[-] Tyhjennä jono"}
+  contents += new HelpText {text = "[*] Jatka / Lopeta"}
+  contents += new HelpText {text = "[/] Shuffle päälle / pois"}
+  contents += new HelpText {text = "[Del] Poista numero"}
+  contents += new Label {
+    preferredSize = new Dimension(SwingUtils.leftX, 40)
+    font = SwingUtils.dialogFont
+    foreground = SwingUtils.dialogColor
+    text = "Kappaleen numero:"
+  }
+  val input = new TextField {
+    font = SwingUtils.dialogFont
+    maximumSize = new Dimension(100, 30)
+    background = new Color(220, 220, 220)
+  }
+  contents += input
 
-    // todo: fix this
-    private def findDefaultAction(c: JTextComponent): Action = {
-      var kmap = c.getKeymap()
-      if (kmap.getDefaultAction != null) {
-        return kmap.getDefaultAction
-      } else {
-        kmap = kmap.getResolveParent
-        while (kmap != null) {
-          if (kmap.getDefaultAction != null) {
-            return kmap.getDefaultAction
-          }
-          kmap = kmap.getResolveParent
-        }
-      }
-      null
-    }
-
-    def handlePlus {
-      if (getText.isEmpty) {
-        server.play
-      } else {
-        server.play(getText.toInt)
-      }
-      setText("")
-    }
-
-    def handleEnter {
-      if (getText.isEmpty) {
-        return
-      }
-      server.enqueue(getText.toInt)
-      setText("")
-    }
-
-    def handleStar {
-      if (server.paused) {
-        server.play
-      } else {
-        server.pause
-      }
-    }
-
-    def handleComma {
-      if (getText.length > 0) setText(getText.substring(0, getText.length - 1))
-    }
-
-    class ConsoleAction(defAction: Action) extends AbstractAction {
-      override def actionPerformed(e: ActionEvent) {
-        val command = e.getActionCommand()
-        if (command != null) {
-          command match {
-            case "\n" => handleEnter
-            case "+" => handlePlus
-            case "-" => server.clearQueue
-            case "*" => handleStar
-            case "/" => server.shuffle = !server.shuffle
-            case "," => handleComma
-            case _ => defAction.actionPerformed(e)
-          }
-        }
-      }
-    }
-
-    override def createDefaultModel = {new UpperCaseDocument}
-
-    class UpperCaseDocument extends PlainDocument {
-      override def insertString(offs: Int, str: String, a: AttributeSet) {
-        if (offs <= 4) {
-          super.insertString(offs, str, a)
-        }
+  listenTo(input)
+  reactions += {
+    case EditDone(`input`) => handleEnter
+    case ValueChanged(`input`) => {
+      if (!NumberParser.isNumber(input.text)) {
+        handleCommand
       }
     }
   }
 
-  class QueueJPanel(server: Server) extends JPanel {
-    val currentLabel = SwingUtils.getRightTextLabel("Nyt soi")
-    val queueLength = SwingUtils.getRightTextLabel(SwingUtils.queuePrefix)
-    val shuffleStatus = SwingUtils.getRightTextLabel(SwingUtils.shuffle)
-    val currentTableModel = new CurrentTableModel
-    val currentTable = new JTable(currentTableModel)
-    currentTable.setMinimumSize(SwingUtils.currentTableDimension)
-    currentTable.setPreferredSize(SwingUtils.currentTableDimension)
-    currentTable.setMaximumSize(SwingUtils.currentTableDimension)
-    currentTable.setSize(SwingUtils.currentTableDimension)
-    setColumnWidth(currentTable.getColumnModel().getColumn(0), 60)
-    setColumnWidth(currentTable.getColumnModel().getColumn(1), 280)
-    currentTable.setFont(SwingUtils.currentTableFont)
-    currentTable.setBackground(SwingUtils.currentTableBackground)
-    currentTable.setShowGrid(false)
-    currentTable.setRowHeight(SwingUtils.currentTableRowHeight)
-    setPreferredSize(SwingUtils.rightPanelDimension)
-    setOpaque(false)
-    setLayout(new FlowLayout)
-
-    add(currentLabel, null)
-    add(currentTable, null)
-    add(queueLength, null)
-    add(shuffleStatus, null)
-
-    val updater = new StatusUpdaterThread(this)
-    updater.start
-
-    def fireStatusChanged {
-      queueLength.setText(SwingUtils.queuePrefix + server.queueLength)
-      server.shuffle match {
-        case true => shuffleStatus.setText(SwingUtils.shuffle + "Kyllä")
-        case false => shuffleStatus.setText(SwingUtils.shuffle + "Ei")
+  def handleCommand {
+    try {
+      val command: String = input.text.reverse.take(1)
+      command match {
+        case "+" => handlePlus
+        case "-" => server.clearQueue; setInput("")
+        case "*" => handleStar
+        case "/" => server.shuffle = !server.shuffle; setInput("")
+        case "," => handleComma
+        case _ =>
       }
-      if (!server.paused) currentTableModel.fireTableDataChanged()
-    }
-
-    def stop {updater.keepRunning = false}
-
-    def setColumnWidth(col: TableColumn, width: Int) {
-      col.setWidth(width)
-      col.setPreferredWidth(width)
-      col.setMinWidth(width)
-      col.setMaxWidth(width)
-    }
-
-    class CurrentTableModel extends AbstractTableModel {
-      override def getColumnCount = {2}
-
-      override def getRowCount = {4}
-
-      def getValueAt(row: Int, col: Int) = {
-        var value = ""
-        if (server.track != null || server.playing) {
-          row match {
-            case 0 => if (col == 0) value = server.track.id.get.toString else value = ""
-            case 1 => if (col == 1) value = server.track.artist else ""
-            case 2 => if (col == 1) value = server.track.title else ""
-            case 3 => if (col == 0) value = formatTime(server.elapsedTimeInSeconds) else value = formatTime(server.track.length)
-          }
-        }
-        value
+    } catch {
+      case e => {
+        setInput("")
       }
-
-      private def formatTime(orig: Long) = {
-        val minutes: Int = orig.toInt / 60
-        val seconds: Int = orig.toInt - minutes * 60
-        padding(minutes.toString) + ":" + padding(seconds.toString)
-      }
-
-      private def padding(unit: String) = {if (unit.length == 1) "0" + unit else unit}
     }
+  }
 
-    class StatusUpdaterThread(val queueJPanel: QueueJPanel) extends Thread {
-      val INTERVAL = 100
-      var keepRunning: Boolean = _
-      keepRunning = true
+  def handleEnter {
+    try {
+      server.enqueue(input.text.toInt)
+    } catch {case _ =>}
+    setInput("")
+  }
 
-      override def run {
-        while (keepRunning) {
-          queueJPanel.fireStatusChanged
-          try {
-            Thread.sleep(INTERVAL)
-          } catch {
-            case e: InterruptedException => {}
-          }
-        }
+  def setInput(text: String) {
+    invokeLater({input.text = text})
+  }
+
+  def invokeLater[X](exp: => X) {
+    import javax.swing.SwingUtilities
+    SwingUtilities.invokeLater(new Runnable() {
+      def run = exp
+    })
+  }
+
+  def handlePlus {
+    if (input.text.drop(1).isEmpty) {
+      server.play
+    } else {
+      server.play(input.text.reverse.drop(1).reverse.toInt)
+    }
+    setInput("")
+  }
+
+  def handleStar {
+    if (server.paused) {
+      server.play
+    } else {
+      server.pause
+    }
+    setInput("")
+  }
+
+  def handleComma {
+    if (input.text.length > 0) setInput(input.text.reverse.drop(2).reverse) else setInput(input.text.reverse.drop(1).reverse)
+  }
+}
+
+class QueuePanel(server: Server) extends BoxPanel(Orientation.Vertical) {
+  opaque = false
+  preferredSize = SwingUtils.rightPanelDimension
+  val queuePrefix = "Jonossa: "
+  val shuffle = "Shuffle: "
+  val queueLength = new RightTextLabel {text = queuePrefix}
+  val shuffleStatus = new RightTextLabel {text = shuffle}
+
+  val currentTable = new Table(4, 2) {
+    preferredSize = new Dimension(350, 100)
+    font = new Font("Arial", Font.PLAIN, 20)
+    background = new Color(220, 220, 220)
+    showGrid = false
+    rowHeight = 25
+    peer.getColumnModel.getColumn(0).setPreferredWidth(75)
+    peer.getColumnModel.getColumn(1).setPreferredWidth(265)
+  }
+
+  //contents += new RightTextLabel {text = "Nyt soi"}
+  contents += currentTable
+  contents += queueLength
+  contents += shuffleStatus
+
+  StatusUpdater.panel = this
+  StatusUpdater.start
+
+  def updateTable {
+    def formatTime(orig: Long) = {
+      def padding(unit: String) = {if (unit.length == 1) "0" + unit else unit}
+      val minutes: Int = orig.toInt / 60
+      val seconds: Int = orig.toInt - minutes * 60
+      padding(minutes.toString) + ":" + padding(seconds.toString)
+    }
+    queueLength.text = queuePrefix + server.queueLength
+    server.shuffle match {
+      case true => shuffleStatus.text = shuffle + "Kyllä"
+      case false => shuffleStatus.text = shuffle + "Ei"
+    }
+    currentTable.update(0, 0, server.track.id.get.toString)
+    currentTable.update(1, 1, server.track.artist)
+    currentTable.update(2, 1, server.track.title)
+    currentTable.update(3, 0, formatTime(server.elapsedTimeInSeconds))
+    currentTable.update(3, 1, formatTime(server.track.length))
+  }
+}
+
+object StatusUpdater extends Thread {
+  var keepRunning: Boolean = _
+  var panel: QueuePanel = _
+
+  override def run {
+    while (true) {
+      panel.updateTable
+      try {
+        Thread.sleep(100)
+      } catch {
+        case e: InterruptedException => {}
       }
     }
   }
