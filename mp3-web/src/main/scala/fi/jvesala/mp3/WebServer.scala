@@ -26,6 +26,7 @@ class WebServer extends Step {
 
   get("/search/:text") {
     val text = params(":text")
+    val skip = paramsMap.value.get("skip").getOrElse(0)
     val tracks = database.getByText(text)
     tracks.length match {
       case 0 => Template.page("tracksearch", <div></div>)
@@ -78,7 +79,7 @@ class WebServer extends Step {
           <title>
             {title}
           </title>
-            <link href="/mp3.css" rel="stylesheet" type="text/css"/>
+            <link href="/css/mp3.css" rel="stylesheet" type="text/css"/>
         </head>
         <body>
           {content}
