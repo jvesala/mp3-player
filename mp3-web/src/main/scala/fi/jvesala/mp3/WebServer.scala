@@ -27,7 +27,7 @@ class WebServer extends Step {
   get("/search/:text") {
     val text = params(":text")
     val skip  = paramsMap.value.get("skip").getOrElse("0")
-    val tracks = database.getByText(text).drop(skip.toInt)
+    val tracks = database.getByText(text).drop(skip.toInt).take(50)
     tracks.length match {
       case 0 => Template.page("tracksearch", <div></div>)
       case _ => Template.page("tracksearch", <div id="search">

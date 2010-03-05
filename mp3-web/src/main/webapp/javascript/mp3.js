@@ -1,5 +1,4 @@
-var emptySearch = "Kirjoita jotain hakeaksesi. Sata ensimm&auml;ist&auml; osumaa n&auml;ytet&auml;&auml;n.";
-var searchString;
+var searchString = "";
 var search = null;
 
 $.fn.textEvent = function(type, func) {
@@ -14,28 +13,12 @@ $.fn.textEvent = function(type, func) {
 
 function setResults(data) {
   $("#results").html(data);
-  $("#indicator").css("background-image", "none");
+  $("#indicator").hide();
 }
-
-/**
-function searchTrack(query) {
-  if (query == "") {
-    setResults(emptySearch);
-    return;
-  }
-  $.get("/servlet/search/" + query, function(data) {
-    if (query == searchString) {
-      setResults(data);
-    }
-  });
-}
-*/
-
 
 function searchTrack(query) {
   var searchUrl = "/servlet/search/" + query;
-
-  $("#indicator").css("background-image", "url('reikajalka.gif')");
+  $("#indicator").show();
 
   $.ajax({
     url: searchUrl,
@@ -64,6 +47,6 @@ $(function() {
       searchTrack(searchString);
     }, 600);
   });
-  setResults(emptySearch);
+  searchTrack("");
 });
 
