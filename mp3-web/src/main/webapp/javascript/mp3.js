@@ -11,15 +11,9 @@ $.fn.textEvent = function(type, func) {
   });
 };
 
-function setResults(data) {
-  $("#results").html(data);
-  $("#indicator").hide();
-}
-
 function searchTrack(query) {
   var searchUrl = "/servlet/search/" + query;
-  $("#indicator").show();
-
+  showIndicator();
   $.ajax({
     url: searchUrl,
     dataType: "html",
@@ -39,6 +33,27 @@ function searchTrack(query) {
   });
 }
 
+function showIndicator() {
+  $("#indicator").show();
+  $("#count").hide();
+}
+
+function setResults(data) {
+  $("#results").html(data);
+  showCount($(".resultCount").html());
+}
+
+function showCount(count) {
+  $("#indicator").hide();
+  var html = "Ei osumia.";
+  if (count == 1) {
+    html = "1 osuma.";
+  } else if (count > 1) {
+    html = count + " osumaa";
+  }
+  $("#count").show().html(html);
+}
+
 $(function() {
   $("#searchstring").textEvent('bind', function() {
     clearTimeout(search);
@@ -48,5 +63,6 @@ $(function() {
     }, 600);
   });
   searchTrack("");
+  $("#searchstring").focus();
 });
 

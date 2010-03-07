@@ -27,12 +27,13 @@ class WebServer extends Step {
   get("/search/:text") {
     val text = params(":text")
     val skip  = paramsMap.value.get("skip").getOrElse("0")
-    val tracks = database.getByText(text).drop(skip.toInt).take(50)
+    val tracks = database.getByText(text)
     tracks.length match {
       case 0 => Template.page("tracksearch", <div></div>)
       case _ => Template.page("tracksearch", <div id="search">
+        <span class="resultCount">{tracks.length}</span>
         <ul>
-          {for (track <- tracks) yield {
+          {for (track <- tracks.drop(skip.toInt).take(50)) yield {
           <li>
             {trackHtml(track, text)}
           </li>
