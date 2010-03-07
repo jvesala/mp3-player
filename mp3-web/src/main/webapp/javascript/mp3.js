@@ -14,6 +14,7 @@ $.fn.textEvent = function(type, func) {
 function searchTrack(query) {
   var searchUrl = "/servlet/search/" + query;
   showIndicator();
+  setClear(query);
   $.ajax({
     url: searchUrl,
     dataType: "html",
@@ -52,6 +53,20 @@ function showCount(count) {
     html = count + " osumaa";
   }
   $("#count").show().html(html);
+}
+
+function setClear(query) {
+  if (query == "") {
+    $("#clear").hide();
+  } else {
+    $("#clear").show();
+  }
+}
+
+function clearSearch() {
+  searchString = "";
+  $("#searchstring").val("");
+  searchTrack("");
 }
 
 $(function() {

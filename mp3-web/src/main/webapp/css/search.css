@@ -43,9 +43,23 @@ body {
   float: right;
 }
 
-#searchstring {
+#searchControl {
   width: 300px;
   background-color: #cca57e;
+  overflow: auto;
+  border: 1px solid black;
+}
+#searchstring {
+  width: 280px;
+  background-color: #cca57e;
+  float: left;
+  border: none;
+}
+
+#clear {
+  padding-top: 4px;
+  padding-right: 4px;
+  float: right;
 }
 
 #results {
